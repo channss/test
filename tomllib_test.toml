@@ -1,0 +1,13 @@
+[test__event__chanmin]
+event_type = "일반"
+
+[test__event__chanmin.targets]
+amplitude = ["wanted"]
+airbridge = ["test"]
+
+[concurrent__apply]
+amplitude = ["wanted"]
+event_type = "동시지원"
+
+[gnb]
+amplitude = ["wanted", "insight"]
