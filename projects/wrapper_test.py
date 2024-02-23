@@ -613,5 +613,5 @@ if __name__ == '__main__':
     context = event.pop('context')
     context2 = event2.pop('context')
 
-    oce = OrdinaryClassEvent(event, context)
-    oc2 = OrdinaryClassEvent(event2, context2)
+    # oce = OrdinaryClassEvent(event, context)
+    # oc2 = OrdinaryClassEvent(event2, context2)
