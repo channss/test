@@ -2,6 +2,16 @@ import boto3
 import requests
 import hashlib
 
+from melting_pot.google import gbq
+from projects.laas import StageABC
+
+
+class Env(StageABC):
+    _stage = {
+        'nextweek': 'nw',
+        'www': 'www',
+    }
+
 
 def get_parameter(key):
     ssm = boto3.client('ssm', region_name='ap-northeast-2')
@@ -12,6 +22,13 @@ def hashing(string):
     return int.from_bytes(
         hashlib.sha256(string.encode()).digest()[:4]
     )
+
+
+def get_skills():
+    return gbq("""
+        select distinct content
+        from `wanted-data-nw.temp.chann_skill_test`
+    """, Env.config("_stage"))
 
 
 def call_wanted_api(method, path, **kwargs):
