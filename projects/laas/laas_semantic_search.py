@@ -1,6 +1,8 @@
 import boto3
 import requests
 import hashlib
+import json
+from argparse import ArgumentParser
 
 from melting_pot.google import gbq
 from projects.laas import StageABC
@@ -44,15 +46,47 @@ def call_wanted_api(method, path, **kwargs):
     )
 
 
+def semantic_search(skill, collection):
+    return requests.request(
+        method="POST",
+        url=f"https://dev-api-laas.wanted.co.kr/api/document/{collection}/similar/text",
+        headers={
+            "project": "WANTED_DATA",
+            "apiKey": WANTED_LAAS_API_KEY,
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        json={
+            "text": skill,
+            "limit": 5,
+            "offset": 0,
+            "with_metadata": True,
+            "with_vector": False,
+            "min_score": 0.8
+        }
+    )
+
+
 if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument('--keyword', required=True, type=str)
+    args = parser.parse_args()
+
     WANTED_LAAS_API_KEY = get_parameter('/DATA/PIPELINE/API_KEY/OPENAI/DEV')
 
-    doc_id = 88173997
-    # res = call_wanted_api('GET', f"/api/document/channtest/{1}")
-    collection_name = 'chann_test'
-    body = {
-        "dimension": 1536,
-        "embedding_model": "text-embedding-ada-002",
-        "service_type": "azure"
-    }
-    # res = call_wanted_api('POST', f'/api/collection/{collection_name}', json=body)
+    collection_name = 'channtest'
+
+    # skills = get_skills().to_dict(orient='records')
+    # for s in skills:
+    #     sname = s['content']
+    #     doc_id = hashing(sname)
+    #     response = call_wanted_api(
+    #         'PUT',
+    #         f'/api/document/{collection_name}/{doc_id}',
+    #         json={
+    #             'text': sname,
+    #         },
+    #     )
+    #     print(doc_id, sname, response.text)
+    # response = call_wanted_api('GET', f'/api/collection/{collection_name}')
+    res = semantic_search(args.keyword, collection_name)
+    print(json.loads(res.text))
