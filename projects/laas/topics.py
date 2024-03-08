@@ -1,5 +1,6 @@
-from melting_pot.google import gbq
+from melting_pot.google import gbq, safe_send_bigquery
 from projects.laas import StageABC
+from bertopic import BERTopic
 
 
 class Env(StageABC):
@@ -9,7 +10,7 @@ class Env(StageABC):
     }
 
 
-def asdf():
+def get_skills():
     return gbq(
         '''
         WITH skill_df AS (
@@ -28,4 +29,12 @@ def asdf():
 
 
 if __name__ == '__main__':
-    res = asdf()
+    results = get_skills()
+    topic_model = BERTopic()
+    topics, probs = topic_model.fit_transform(results.content)
+
+    groups = topic_model.get_topic_info()
+    names = groups['Name']
+    safe_send_bigquery(groups, 'temp.channtest', if_exists='replace')
+
+    # topic_model.get_representative_docs() 번역 때리기
